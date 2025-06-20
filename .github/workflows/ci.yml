@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - version-1
+
   pull_request:
     branches:
       - version-1
@@ -11,21 +12,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -58,7 +44,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20.x"
+          node-version: "latest"
 
       - name: Install Node.js dependencies
         run: npm install
@@ -71,12 +57,3 @@ jobs:
 
       - name: Generate Laravel app key
         run: php artisan key:generate
-
-      - name: Run migrations
-        run: php artisan migrate --force
-
-
-
-      # Si vous avez des tests JS, ajoutez-les ici
-      # - name: Run JS tests
-      #   run: npm run test
