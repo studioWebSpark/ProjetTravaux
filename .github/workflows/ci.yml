@@ -1,59 +1,82 @@
 name: CI Laravel Vue.js ConseillerImmo
 
 on:
-push:
-branches:
-- version-1
-
-pull_request:
-branches:
-- version-1
+  push:
+    branches:
+      - version-1
+  pull_request:
+    branches:
+      - version-1
 
 jobs:
-build:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout code
-  uses: actions/checkout@v3
+  build:
+    runs-on: ubuntu-latest
 
-- name: Cache Composer dependencies
-  uses: actions/cache@v3
-  with:
-    path: vendor
-    key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-    restore-keys: |
-      ${{ runner.os }}-composer-
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
-- name: Setup PHP
-  uses: shivammathur/setup-php@v2
-  with:
-    php-version: '8.3'
-    extensions: mbstring, pdo, pdo_mysql, bcmath, json, curl
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-- name: Install Composer dependencies
-  run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
-- name: Cache Node.js dependencies
-  uses: actions/cache@v3
-  with:
-    path: node_modules
-    key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-    restore-keys: |
-      ${{ runner.os }}-node-
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo, pdo_mysql, bcmath, json, curl
 
-- name: Setup Node.js
-  uses: actions/setup-node@v3
-  with:
-    node-version: 'latest'
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
 
-- name: Install Node.js dependencies
-  run: npm install
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-- name: Build assets
-  run: npm run build
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
 
-- name: Set up .env file
-  run: cp .env.example .env
+      - name: Install Node.js dependencies
+        run: npm install
 
-- name: Generate Laravel app key
-  run: php artisan key:generate
+      - name: Build assets
+        run: npm run build
+
+      - name: Set up .env file
+        run: cp .env.example .env
+
+      - name: Generate Laravel app key
+        run: php artisan key:generate
+
+      - name: Run migrations
+        run: php artisan migrate --force
+
+
+
+      # Si vous avez des tests JS, ajoutez-les ici
+      # - name: Run JS tests
+      #   run: npm run test
