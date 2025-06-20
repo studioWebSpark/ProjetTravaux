@@ -4,6 +4,7 @@ on:
 push:
 branches:
 - version-1
+
 pull_request:
 branches:
 - version-1
