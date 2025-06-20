@@ -1,4 +1,4 @@
-name: CI Laravel Vue.js ProjetTravaux
+name: CI Laravel Vue.js ConseillerImmo
 
 on:
 push:
@@ -56,6 +56,3 @@ steps:
 
 - name: Generate Laravel app key
   run: php artisan key:generate
-
-
-
