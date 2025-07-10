@@ -31,6 +31,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -65,5 +66,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public static function redirectTo()
+    {
+        $user = auth()->user();
+        if ($user->role === 'admin') {
+            return '/admin';
+        } elseif ($user->role === 'artisan') {
+            return '/dashboard/pro';
+        } else {
+            return '/dashboard/user';
+        }
     }
 }
