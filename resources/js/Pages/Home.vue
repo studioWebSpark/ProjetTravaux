@@ -9,7 +9,7 @@
             <p class="text-gray-600">Connectez particuliers et professionnels</p>
           </div>
           <div>
-            
+
           </div>
         </div>
       </div>
